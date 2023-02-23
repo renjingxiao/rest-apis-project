@@ -1,17 +1,18 @@
 import uuid
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from schemas import StoreSchema
 
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from db import db
 from models import StoreModel
-from schemas import StoreSchema
 
-blp = Blueprint("stores", __name__, description="Operations on stores")
 
-@blp.route("/store/<int:store_id>")
+blp = Blueprint("Stores", "stores", description="Operations on stores")
+
+
+@blp.route("/store/<string:store_id>")
 class Store(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):
@@ -23,10 +24,11 @@ class Store(MethodView):
         db.session.commit()
         return {"message": "Store deleted"}, 200
 
+
 @blp.route("/store")
 class StoreList(MethodView):
     @blp.response(200, StoreSchema(many=True))
-    def get(self):
+    def get(cls):
         return StoreModel.query.all()
 
     @blp.arguments(StoreSchema)
