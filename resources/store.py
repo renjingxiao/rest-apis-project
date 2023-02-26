@@ -1,12 +1,10 @@
-import uuid
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from schemas import StoreSchema
-
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from db import db
 from models import StoreModel
+from schemas import StoreSchema
 
 
 blp = Blueprint("Stores", "stores", description="Operations on stores")
@@ -20,6 +18,7 @@ class Store(MethodView):
         return store
 
     def delete(self, store_id):
+        store = StoreModel.query.get_or_404(store_id)
         db.session.delete(store)
         db.session.commit()
         return {"message": "Store deleted"}, 200
@@ -28,7 +27,7 @@ class Store(MethodView):
 @blp.route("/store")
 class StoreList(MethodView):
     @blp.response(200, StoreSchema(many=True))
-    def get(cls):
+    def get(self):
         return StoreModel.query.all()
 
     @blp.arguments(StoreSchema)
